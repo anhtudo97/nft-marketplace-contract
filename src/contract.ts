@@ -1,6 +1,7 @@
 import {
   Approval as ApprovalEvent,
   ApprovalForAll as ApprovalForAllEvent,
+  Contract,
   NFTTransfer as NFTTransferEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
   Transfer as TransferEvent
@@ -8,6 +9,7 @@ import {
 import {
   Approval,
   ApprovalForAll,
+  NFT,
   NFTTransfer,
   OwnershipTransferred,
   Transfer
@@ -44,20 +46,16 @@ export function handleApprovalForAll(event: ApprovalForAllEvent): void {
 }
 
 export function handleNFTTransfer(event: NFTTransferEvent): void {
-  let entity = new NFTTransfer(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  entity.tokenID = event.params.tokenID
-  entity.from = event.params.from
-  entity.to = event.params.to
-  entity.tokenURI = event.params.tokenURI
-  entity.price = event.params.price
+  let entity = new NFT(event.params.tokenID.toString());
+  entity.from = event.params.from;
+  entity.to = event.params.to;
+  entity.tokenURI = event.params.tokenURI;
+  entity.price = event.params.price;
 
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.save()
+  const nftMarket = Contract.bind(event.address);
+  const tokenURI = nftMarket.tokenURI(event.params.tokenID);
+  entity.tokenURI = tokenURI;
+  entity.save();
 }
 
 export function handleOwnershipTransferred(
